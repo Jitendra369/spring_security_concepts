@@ -4,22 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import security.auth_provider.CustomAuthProvider;
 import security.service.UserDetailsServiceImple;
 
 @Configuration
@@ -29,13 +22,17 @@ public class MyConfig {
     @Autowired
     private final UserDetailsServiceImple customUserDetailsService;
 
+//    @Bean
+//   public AuthenticationProvider authenticationProvider(){
+//       DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+//       authenticationProvider.setUserDetailsService(customUserDetailsService);
+//       authenticationProvider.setPasswordEncoder(passwordEncoder());
+//       return authenticationProvider;
+//   }
     @Bean
-   public AuthenticationProvider authenticationProvider(){
-       DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-       authenticationProvider.setUserDetailsService(customUserDetailsService);
-       authenticationProvider.setPasswordEncoder(passwordEncoder());
-       return authenticationProvider;
-   }
+    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder){
+        return new CustomAuthProvider(customUserDetailsService, passwordEncoder);
+    }
 
 //    @Bean
 //    public UserDetailsService userDetailsService(){
@@ -66,6 +63,5 @@ public class MyConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
-//        return NoOpPasswordEncoder.getInstance();
     }
 }

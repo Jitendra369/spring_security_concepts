@@ -19,6 +19,7 @@ public class UserDetailsServiceImple implements UserDetailsService {
 
     private final UserRepo userRepo;
 
+//     what if we have thumb scan for user valiadtion
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userRepo.findByUsername(username);
