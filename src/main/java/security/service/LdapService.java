@@ -4,11 +4,14 @@ import org.antlr.v4.runtime.atn.AtomTransition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.support.LdapNameBuilder;
 import org.springframework.stereotype.Service;
 import security.dto.LdapUserDto;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.ldap.LdapName;
 import java.util.List;
 
 @Service
@@ -44,5 +47,19 @@ public class LdapService {
                 return ldapUserDto;
             }
         });
+    }
+
+    public void createUser(LdapUserDto ldapUserDto){
+            LdapName dn = LdapNameBuilder.newInstance("ou=users, ou=system")
+                .add("cn", ldapUserDto.getFirstName())
+                .build();
+
+        Attributes attributes = new BasicAttributes();
+        attributes.put("objectClass","inetOrgPerson");
+        attributes.put("cn",ldapUserDto.getFirstName());
+        attributes.put("sn", ldapUserDto.getLastName());
+        attributes.put("uid", ldapUserDto.getUsername());
+        attributes.put("mail",ldapUserDto.getEmail());
+        ldapTemplate.bind(dn,null, attributes);
     }
 }
