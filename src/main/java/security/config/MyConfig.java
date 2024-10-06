@@ -4,11 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.BaseLdapPathContextSource;
+import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,8 +24,8 @@ import security.service.UserDetailsServiceImple;
 @RequiredArgsConstructor
 public class MyConfig {
 
-    @Autowired
-    private final UserDetailsServiceImple customUserDetailsService;
+//    @Autowired
+//    public final UserDetailsServiceImple customUserDetailsService;
 
 //    @Bean
 //   public AuthenticationProvider authenticationProvider(){
@@ -29,10 +34,12 @@ public class MyConfig {
 //       authenticationProvider.setPasswordEncoder(passwordEncoder());
 //       return authenticationProvider;
 //   }
-    @Bean
-    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder){
-        return new CustomAuthProvider(customUserDetailsService, passwordEncoder);
-    }
+
+//     This is use DAO Authentication
+//    @Bean
+//    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder){
+//        return new CustomAuthProvider(customUserDetailsService, passwordEncoder);
+//    }
 
 //    @Bean
 //    public UserDetailsService userDetailsService(){
@@ -63,5 +70,26 @@ public class MyConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public LdapTemplate ldapContextSource(){
+        return new LdapTemplate(contextSource());
+    }
+
+    @Bean
+    public LdapContextSource contextSource() {
+        LdapContextSource ldapContextSource = new LdapContextSource();
+        ldapContextSource.setUrl("ldap://localhost:10389");
+        ldapContextSource.setUserDn("uid=admin,ou=system");
+        ldapContextSource.setPassword("secret");
+        return ldapContextSource;
+    }
+
+    @Bean
+    public AuthenticationManager authManager(BaseLdapPathContextSource baseLdapPathContextSource){
+        LdapBindAuthenticationManagerFactory factory = new LdapBindAuthenticationManagerFactory(baseLdapPathContextSource);
+        factory.setUserDnPatterns("cn={0},ou=users,ou=system");
+        return factory.createAuthenticationManager();
     }
 }

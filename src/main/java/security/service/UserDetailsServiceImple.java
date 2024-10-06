@@ -13,7 +13,8 @@ import security.repo.UserRepo;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@Component
+//todo : uncomment for DAO authentication
+//@Component
 @RequiredArgsConstructor
 public class UserDetailsServiceImple implements UserDetailsService {
 

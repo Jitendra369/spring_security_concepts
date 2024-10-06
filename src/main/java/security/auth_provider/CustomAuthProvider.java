@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import security.service.UserDetailsServiceImple;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class CustomAuthProvider implements AuthenticationProvider {
