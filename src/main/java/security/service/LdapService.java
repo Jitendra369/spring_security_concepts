@@ -1,5 +1,6 @@
 package security.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.atn.AtomTransition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
@@ -9,17 +10,20 @@ import org.springframework.stereotype.Service;
 import security.dto.LdapUserDto;
 
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.*;
 import javax.naming.ldap.LdapName;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class LdapService {
 
     @Autowired
     private LdapTemplate ldapTemplate;
+
+    private static final String LDAP_BASE_URL = "ou=users,ou=system";
 
     public List<String> getAllNames(){
         String base = "ou=users,ou=system";
@@ -69,5 +73,24 @@ public class LdapService {
         attributes.put("uid", ldapUserDto.getUsername());
         attributes.put("mail",ldapUserDto.getEmail());
         ldapTemplate.bind(dn,null, attributes);
+    }
+
+    public List<String> getAllGroupNames(){
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+        List<SearchResult> resultList = ldapTemplate.search(
+                LDAP_BASE_URL,
+                "(objectClass=groupOfNames)",
+                searchControls,
+                (AttributesMapper<SearchResult>) ctx -> (SearchResult) ctx);
+
+        // Extract group names from results
+
+        if ( resultList!=null && resultList.size() > 0){
+            return resultList.stream().map(result -> result.getNameInNamespace()).collect(Collectors.toList());
+        }
+        log.info("No user group found");
+        return new ArrayList<>();
     }
 }

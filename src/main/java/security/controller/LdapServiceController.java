@@ -42,4 +42,9 @@ public class LdapServiceController {
             super(message, cause);
         }
     }
+
+    @GetMapping("/groups")
+    public List<String> getAlllUserGroup(){
+        return ldapService.getAllGroupNames();
+    }
 }
