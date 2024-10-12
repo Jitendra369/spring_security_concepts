@@ -1,5 +1,6 @@
 package security.controller;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
@@ -10,6 +11,8 @@ import security.dto.LdapUserDto;
 import security.service.LdapService;
 
 import javax.naming.NameAlreadyBoundException;
+import javax.naming.directory.SearchResult;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -46,5 +49,21 @@ public class LdapServiceController {
     @GetMapping("/groups")
     public List<String> getAlllUserGroup(){
         return ldapService.getAllGroupNames();
+    }
+
+    @GetMapping("/find/{commonName}")
+    public String getUserByCommonName(@PathVariable String commonName){
+        return ldapService.findByCommonName(commonName);
+    }
+
+    @GetMapping("/ou")
+    public List<String> getAllOrgUnits(){
+//        return ldapService.getAllGroupNamesV1();
+        return ldapService.getAllGroupNamesUsingContextSource();
+    }
+
+    @GetMapping("/user/mapped")
+    public HashMap<String ,List<String>> getOuWithGroup(){
+        return ldapService.getOuWithUser();
     }
 }
